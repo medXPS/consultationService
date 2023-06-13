@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: consultation-service-app
+spec:
+  selector:
+    matchLabels:
+      app: consultation-service-app
+  template:
+    metadata:
+      labels:
+        app: consultation-service-app
+    spec:
+      containers:
+        - name: consultation-service-app
+          image: IMAGE_URL/consultationservice
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8082
+          env:
+
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: mysql-cm
+                  key: hostname
+          resources:
+            limits:
+              cpu: 1
+              memory: 512Mi
+            requests:
+              cpu: 500m
+              memory: 256Mi
+
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: consultation-service-svc
+spec:
+  type: LoadBalancer
+  selector:
+    app: consultation-service-app
+  ports:
+    - port: 80
+      targetPort: 8082
